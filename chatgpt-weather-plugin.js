@@ -11,32 +11,40 @@ for (const cityElement of cityElements) {
   });
 }
 
-// Fetch weather information for each city
+// Fetch forecast information for each city
 for (const city of cities) {
-  const url = `https://api.openweathermap.org/data/2.5/weather?q=${city.name}&units=${units}&appid=${apiKey}`;
+  const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city.name}&units=${units}&appid=${apiKey}`;
 
   fetch(url)
     .then(response => response.json())
     .then(data => {
-      const weatherData = data.weather[0];
-      const weatherIcon = `http://openweathermap.org/img/wn/${weatherData.icon}@2x.png`;
-      const weatherDescription = weatherData.description;
-      const weatherTemperature = data.main.temp;
+      const list = data.list;
 
-      // Create the weather info div
-      const weatherInfo = document.createElement("div");
-      weatherInfo.style.position = "absolute";
-      weatherInfo.style.right = "0";
-      weatherInfo.style.top = "0";
-      weatherInfo.style.backgroundColor = "#f2f2f2";
-      weatherInfo.style.padding = "5px";
-      weatherInfo.innerHTML = `
-        <p>${weatherTemperature} &deg;C</p>
-        <p>${weatherDescription}</p>
-        <img src="${weatherIcon}" alt="${weatherDescription}" />
-      `;
+      // Create the forecast info div
+      const forecastInfo = document.createElement("div");
+      forecastInfo.style.position = "absolute";
+      forecastInfo.style.right = "0";
+      forecastInfo.style.top = "0";
+      forecastInfo.style.backgroundColor = "#f2f2f2";
+      forecastInfo.style.padding = "5px";
+      forecastInfo.innerHTML = "";
 
-      // Add the weather info div next to the city element
-      city.element.parentNode.appendChild(weatherInfo);
+      // Add the forecast information for each day
+      for (const weatherData of list) {
+        const date = new Date(weatherData.dt * 1000);
+        const day = date.toLocaleDateString("en-US", {weekday: "short"});
+        const weatherIcon = `http://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png`;
+        const weatherDescription = weatherData.weather[0].description;
+        const weatherTemperature = weatherData.main.temp;
+        forecastInfo.innerHTML += `
+          <p>${day}: ${weatherTemperature} &deg;C</p>
+          <p>${weatherDescription}</p>
+          <img src="${weatherIcon}" alt="${weatherDescription}" />
+          <br />
+        `;
+      }
+
+      // Add the forecast info div next to the city element
+      city.element.parentNode.appendChild(forecastInfo);
     });
 }
